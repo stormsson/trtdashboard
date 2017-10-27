@@ -15,6 +15,19 @@ class BalanceCalculator {
         $this->trades[$t->getId()] = $t;
     }
 
+    public function calculateInstantProfit(Trade $t, $currentPrice, $fee=0.002)
+    {
+        $buyingFee = $t->getAmount() * $t->getPrice() * $fee ;
+        $sellingFee = $t->getAmount() * $currentPrice * $fee ;
+
+        $buyingPrice = $t->getAmount() * $t->getPrice();
+        $sellingPrice = $t->getAmount() * $currentPrice;
+
+        $profit =  $sellingPrice - $buyingPrice - $buyingFee - $sellingFee;
+
+        return $profit;
+    }
+
     protected function calculateBalance() {
 
         /* @var $trade Trade */

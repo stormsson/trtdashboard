@@ -30,8 +30,12 @@ class Trade {
         $this->setSide($tradeArray['side']);
         $this->setOrderId($tradeArray['order_id']);
 
-        //[date] => 2017-10-18T06:53:05.601Z
+        $this->setDate(new \DateTime($tradeArray['date']));
+    }
 
+    public function calculateFee($feeMultiplier=0.002) // 0.2%
+    {
+        return $this->getAmount() * $this->getPrice() * $feeMultiplier;
     }
 
 
@@ -130,5 +134,23 @@ class Trade {
     {
         $this->price = $price;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDate(): \DateTime
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param mixed $date
+     */
+    public function setDate(\DateTime $date)
+    {
+        $this->date = $date;
+    }
+
+
 
 }

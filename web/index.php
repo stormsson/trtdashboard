@@ -5,6 +5,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 use TRTApi\TRTApi;
 use Dashboard\Components\BalanceCalculator;
 use Dashboard\Entities\Trade;
+use Dashboard\Entities\OrderBook;
 
 
 $app = new Silex\Application();
@@ -12,12 +13,19 @@ $app = new Silex\Application();
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
+
 $app['debug'] = true;
 
 $app->get('/', function () use ($app) {
     return $app['twig']->render('index.twig', [
     ]);
 });
+
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 
 $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecret, $fundIds) use($app) {
 
@@ -53,6 +61,63 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
     }
 
     return $app->json($result);
+});
+
+
+$app->get('/position/{tradeId}/{apiKey}/{apiSecret}', function($tradeId, $apiKey, $apiSecret) use($app) {
+
+    $trtApi = new TRTApi($apiKey, $apiSecret);
+
+    $trades = $trtApi->getTrades();
+    $bc = new BalanceCalculator();
+
+    $trade = false;
+    foreach ($trades['trades'] as $t) {
+        if($t['id'] == $tradeId) {
+            $trade = new Trade($t);
+        }
+
+    }
+
+    if($trade) {
+
+        $tradeQty = $trade->getAmount();
+        $orderBook = new OrderBook($trtApi->getOrderBook());
+        $ticker = $trtApi->getTicker();
+        $lastSell = $ticker['last'];
+        $topBuy = $orderBook->getTopBuy($tradeQty);
+
+        $instaSell = $bc->calculateInstantProfit($trade, $topBuy);
+        $currentPriceSell = $bc->calculateInstantProfit($trade, $lastSell);
+
+        $result = array(
+            'trade' => [
+                'amount' => $trade->getAmount(),
+                'price' =>  $trade->getPrice(),
+                'value' => $trade->getAmount() * $trade->getPrice(),
+                'buying_fee' => $trade->calculateFee()
+            ],
+            'sell_last' => [
+                'price'=> $lastSell,
+                'value' => $trade->getAmount() * $lastSell,
+                'selling_fee' => $lastSell * $trade->getAmount() * 0.002,
+                'profit'=> $currentPriceSell
+            ],
+            'instaSell' => [
+                'price'=> $topBuy,
+                'value' => $trade->getAmount() * $topBuy,
+                'selling_fee'=> $topBuy * $trade->getAmount() * 0.002,
+                'profit'=> $instaSell
+            ],
+            'last' => $ticker['last']
+
+        );
+
+        return $app->json($result);
+    }
+
+    throw new \Exception("Something bad happened");
+
 
 });
 
