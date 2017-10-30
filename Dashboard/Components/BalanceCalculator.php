@@ -15,9 +15,28 @@ class BalanceCalculator {
         $this->trades[$t->getId()] = $t;
     }
 
+    public function getTrades($sideFilter = Trade::SIDE_ALL)
+    {
+        $tmp = [];
+
+        if($sideFilter == Trade::SIDE_ALL) {
+            return $this->trades;
+        }
+
+        /** @var Trade $t */
+        foreach ($this->trades as $t) {
+            if ($t->getSide() == $sideFilter){
+                $tmp[] = $t;
+            }
+        }
+
+        return $tmp;
+        
+    }
+
     public function calculateInstantProfit(Trade $t, $currentPrice, $fee=0.002)
     {
-        $buyingFee = $t->getAmount() * $t->getPrice() * $fee ;
+        $buyingFee = $t->calculateFee($fee);
         $sellingFee = $t->getAmount() * $currentPrice * $fee ;
 
         $buyingPrice = $t->getAmount() * $t->getPrice();

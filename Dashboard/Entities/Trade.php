@@ -6,6 +6,7 @@ class Trade {
 
     const SIDE_BUY = "buy";
     const SIDE_SELL = "sell";
+    const SIDE_ALL = false;
 
     public $id;
     public $fund_id;
@@ -36,6 +37,22 @@ class Trade {
     public function calculateFee($feeMultiplier=0.002) // 0.2%
     {
         return $this->getAmount() * $this->getPrice() * $feeMultiplier;
+    }
+
+    public function calculateSellingFee($sellingPrice, $feeMultiplier=0.002)
+    {
+        return $this->getAmount() * $sellingPrice * $feeMultiplier;
+    }
+
+
+    public function calculateSellingValue($sellingPrice, $feeMultiplier=0)
+    {
+        $value = $this->getAmount() * $sellingPrice;
+        if($feeMultiplier) {
+            $value = $value -  $this->calculateSellingFee($sellingPrice, $feeMultiplier);
+        }
+
+        return $value;
     }
 
 

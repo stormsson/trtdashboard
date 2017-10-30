@@ -1,0 +1,49 @@
+{% extends 'layout/base.twig' %}
+
+{% block content %}
+<h2>Last ticker: {{ lastTicker }}</h2>
+
+    {%  for fundId in funds %}
+        <h2>{{ fundId }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fund</th>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Price</th>
+                    <th>Buy Fee</th>
+                    <th>Buy Total</th>
+                    <th>Buy Net</th>
+                    <th>Sell Fee</th>
+                    <th>Sell Total</th>
+                    <th>Sell Net</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trades[fundId] %}
+
+                    <tr>
+                        <td>{{ t.getFundId() }}</td>
+                        <td>{{ t.getOrderId() }}</td>
+                        <td>{{ t.getDate().format('Y-m-d H:i:s') }}</td>
+                        <td>{{ t.getAmount() }}  </td>
+                        <td>{{ t.getPrice() }}  </td>
+                        <td>{{ t.calculateFee() }}</td>
+                        <td>{{ t.getPrice() * t.getAmount()   }}</td>
+                        <td>{{ t.getPrice() * t.getAmount()  - t.calculateFee() }}</td>
+
+                        <td>{{ t.calculateSellingFee(lastTicker) }}</td>
+                        <td>{{ t.calculateSellingValue(lastTicker) }}</td>
+                        <td>{{ t.calculateSellingValue(lastTicker) -  t.calculateSellingFee(lastTicker)}}</td>
+                        <td>{{ balances[fundId][t.getId()] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% endfor %}
+
+{% endblock %}

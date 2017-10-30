@@ -33,13 +33,19 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
 
     $funds = explode(',', $fundIds);
 
+
     if(!count($funds)) {
        throw new \Exception('No funds selected');
     }
 
+    $bcs = [];
+    $elabTrades = [];
+    $elabBalances = [];
+
     foreach($funds as $fundId) {
         $trades = $trtApi->getTrades($fundId);
-        $bc = new BalanceCalculator();
+        $bcs[$fundId] = new BalanceCalculator();
+        $bc = $bcs[$fundId];
 
         if(!isset($trades['trades'])) {
            throw new \Exception('The API did not return the expected result');
@@ -58,7 +64,22 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
             'balances' => $bc->getBalances(),
             'finalBalance' => $bc->getFinalBalance()
         );
+
+        $elabTrades[$fundId] = $bc->getTrades(Trade::SIDE_BUY);
+        $elabBalances[$fundId] = $bc->getBalances();
     }
+
+
+
+    $params =  [
+        'lastTicker' => $ticker['last'],
+        'funds' => $funds,
+        'trades' => $elabTrades,
+        'balances'=> $elabBalances,
+        'balanceCalculators'=>$bcs
+    ];
+
+    return $app['twig']->render('balance.twig', $params);
 
     return $app->json($result);
 });
