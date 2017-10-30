@@ -41,6 +41,7 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
     $bcs = [];
     $elabTrades = [];
     $elabBalances = [];
+    $tickers = [];
 
     foreach($funds as $fundId) {
         $trades = $trtApi->getTrades($fundId);
@@ -56,23 +57,24 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
             $bc->addTrade($tmpTrade);
         }
 
-        $ticker = $trtApi->getTicker($fundId);
-        $bc->setCurrentPrice($ticker['last']);
+        $tickers[$fundId] = $trtApi->getTicker($fundId);
+        $bc->setCurrentPrice($tickers[$fundId]['last']);
 
         $result[$fundId] = array(
-            'last' => $ticker['last'],
+            'last' => $tickers[$fundId]['last'],
             'balances' => $bc->getBalances(),
             'finalBalance' => $bc->getFinalBalance()
         );
 
         $elabTrades[$fundId] = $bc->getTrades(Trade::SIDE_BUY);
         $elabBalances[$fundId] = $bc->getBalances();
+
     }
 
 
 
     $params =  [
-        'lastTicker' => $ticker['last'],
+        'tickers' => $tickers,
         'funds' => $funds,
         'trades' => $elabTrades,
         'balances'=> $elabBalances,

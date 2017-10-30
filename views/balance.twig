@@ -1,10 +1,9 @@
 {% extends 'layout/base.twig' %}
 
 {% block content %}
-<h2>Last ticker: {{ lastTicker }}</h2>
 
     {%  for fundId in funds %}
-        <h2>{{ fundId }}</h2>
+        <h2>{{ fundId }} (Last: {{ tickers[fundId]['last'] }})</h2>
         <table>
             <thead>
                 <tr>
@@ -35,9 +34,9 @@
                         <td>{{ t.getPrice() * t.getAmount()   }}</td>
                         <td>{{ t.getPrice() * t.getAmount()  - t.calculateFee() }}</td>
 
-                        <td>{{ t.calculateSellingFee(lastTicker) }}</td>
-                        <td>{{ t.calculateSellingValue(lastTicker) }}</td>
-                        <td>{{ t.calculateSellingValue(lastTicker) -  t.calculateSellingFee(lastTicker)}}</td>
+                        <td>{{ t.calculateSellingFee(tickers[fundId]['last']) }}</td>
+                        <td>{{ t.calculateSellingValue(tickers[fundId]['last']) }}</td>
+                        <td>{{ t.calculateSellingValue(tickers[fundId]['last']) -  t.calculateSellingFee(tickers[fundId]['last'])}}</td>
                         <td>{{ balances[fundId][t.getId()] }}</td>
                     </tr>
                 {% endfor %}
