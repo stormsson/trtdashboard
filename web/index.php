@@ -84,7 +84,7 @@ $app->get('/balance/{apiKey}/{apiSecret}/{fundIds}', function($apiKey, $apiSecre
     return $app['twig']->render('balance.twig', $params);
 
     return $app->json($result);
-});
+})->value('fundIds','BTCEUR');
 
 
 $app->get('/position/{tradeId}/{apiKey}/{apiSecret}', function($tradeId, $apiKey, $apiSecret) use($app) {
