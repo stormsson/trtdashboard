@@ -39,6 +39,12 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td colspan="10">{{ balanceCalculators[fundId].getFinalBalance() }}</td>
+              </tr>
+            </tfoot>
         </table>
 
     {% endfor %}
