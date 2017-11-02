@@ -1,0 +1,8 @@
+SSH_HOST=dashboard.crypt01
+SSH_USER=trtscraper
+WEB_DIR=/home/trtscraper/dashboard
+
+rsync:
+	rsync -az --no-perms --delete -i --omit-dir-times . ${SSH_USER}@${SSH_HOST}:${WEB_DIR} --exclude-from 'exclude-list.txt'
+
+deploy: rsync
